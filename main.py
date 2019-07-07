@@ -65,9 +65,19 @@ class Interpreter(object):
         # and return the INTEGER token
         while current_char is not None:
           current_char = text[self.pos]
+          tmp = ''
           if current_char.isdigit():
-              token = Token(INTEGER, int(current_char))
+              tmp = current_char
+              token = Token(INTEGER, int(tmp))
               self.pos += 1
+              if self.pos > len(text) - 1:
+                 current_char = None  # Indicates end of input
+              else:
+                 current_char = text[self.pos]
+              if current_char is not None and current_char.isdigit():
+                tmp += current_char
+                self.pos += 1
+                token = Token(INTEGER, int(tmp))
               return token
 
           if current_char == '+':
