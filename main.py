@@ -3,7 +3,8 @@ import sys
 #
 # EOF (end-of-file) token is used to indicate that
 # there is no more input left for lexical analysis
-INTEGER, PLUS, EOF = 'INTEGER', 'PLUS', 'EOF'
+INTEGER, PLUS, MINUS, EOF = 'INTEGER', 'PLUS', 'MINUS', 'EOF'
+
 
 class Token(object):
     def __init__(self, type, value):
@@ -62,17 +63,29 @@ class Interpreter(object):
         # integer, create an INTEGER token, increment self.pos
         # index to point to the next character after the digit,
         # and return the INTEGER token
-        if current_char.isdigit():
-            token = Token(INTEGER, int(current_char))
-            self.pos += 1
-            return token
+        while current_char is not None:
+          current_char = text[self.pos]
+          if current_char.isdigit():
+              token = Token(INTEGER, int(current_char))
+              self.pos += 1
+              return token
 
-        if current_char == '+':
-            token = Token(PLUS, current_char)
-            self.pos += 1
-            return token
+          if current_char == '+':
+              token = Token(PLUS, current_char)
+              self.pos += 1
+              return token
 
-        self.error()
+          if current_char == '-':
+              token = Token(MINUS, current_char)
+              self.pos += 1
+              return token
+
+          if current_char.isspace():
+              self.pos += 1
+              continue
+
+          self.error()
+        return Token(EOF, None)
 
     def eat(self, token_type):
         # compare the current token type with the passed token
@@ -95,7 +108,10 @@ class Interpreter(object):
 
         # we expect the current token to be a '+' token
         op = self.current_token
-        self.eat(PLUS)
+        if (op.type == PLUS):
+          self.eat(PLUS)
+        else:
+          self.eat(MINUS)
 
         # we expect the current token to be a single-digit integer
         right = self.current_token
@@ -107,7 +123,10 @@ class Interpreter(object):
         # has been successfully found and the method can just
         # return the result of adding two integers, thus
         # effectively interpreting client input
-        result = left.value + right.value
+        if (op.type == PLUS):
+           result = left.value + right.value
+        else:
+           result = left.value - right.value
         return result
 
 
